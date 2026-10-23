@@ -1,0 +1,15 @@
+{
+    "Showing": "Menampilkan",
+    "to": "sampai",
+    "of": "dari",
+    "results": "data",
+    "Previous": "Sebelumnya",
+    "Next": "Berikutnya",
+    "Go to page :page": "Ke halaman :page",
+    "Pagination Navigation": "Navigasi halaman",
+    "Too Many Requests": "Terlalu banyak permintaan",
+    "Forbidden": "Akses ditolak",
+    "Not Found": "Halaman tidak ditemukan",
+    "Page Expired": "Halaman kedaluwarsa",
+    "Server Error": "Kesalahan server"
+}

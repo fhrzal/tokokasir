@@ -1,0 +1,85 @@
+<?php
+
+/*
+|--------------------------------------------------------------------------
+| Pesan validasi Bahasa Indonesia
+|--------------------------------------------------------------------------
+*/
+
+return [
+    'accepted' => ':Attribute harus disetujui.',
+    'array' => ':Attribute harus berupa daftar.',
+    'before_or_equal' => ':Attribute harus berupa tanggal sebelum atau sama dengan :date.',
+    'boolean' => ':Attribute harus bernilai benar atau salah.',
+    'confirmed' => 'Konfirmasi :attribute tidak cocok.',
+    'date' => ':Attribute bukan tanggal yang valid.',
+    'distinct' => ':Attribute memiliki nilai yang duplikat.',
+    'email' => ':Attribute harus berupa alamat email yang valid.',
+    'exists' => ':Attribute yang dipilih tidak valid.',
+    'gte' => [
+        'numeric' => ':Attribute harus lebih besar dari atau sama dengan :value.',
+    ],
+    'in' => ':Attribute yang dipilih tidak valid.',
+    'integer' => ':Attribute harus berupa bilangan bulat.',
+    'max' => [
+        'array' => ':Attribute maksimal berisi :max item.',
+        'file' => ':Attribute maksimal berukuran :max kilobita.',
+        'numeric' => ':Attribute maksimal bernilai :max.',
+        'string' => ':Attribute maksimal berisi :max karakter.',
+    ],
+    'min' => [
+        'array' => ':Attribute minimal berisi :min item.',
+        'file' => ':Attribute minimal berukuran :min kilobita.',
+        'numeric' => ':Attribute minimal bernilai :min.',
+        'string' => ':Attribute minimal berisi :min karakter.',
+    ],
+    'numeric' => ':Attribute harus berupa angka.',
+    'password' => [
+        'letters' => ':Attribute harus mengandung minimal satu huruf.',
+        'mixed' => ':Attribute harus mengandung minimal satu huruf besar dan satu huruf kecil.',
+        'numbers' => ':Attribute harus mengandung minimal satu angka.',
+        'symbols' => ':Attribute harus mengandung minimal satu simbol.',
+        'uncompromised' => ':Attribute ini pernah bocor di internet. Gunakan :attribute lain.',
+    ],
+    'regex' => 'Format :attribute tidak valid.',
+    'required' => ':Attribute wajib diisi.',
+    'string' => ':Attribute harus berupa teks.',
+    'unique' => ':Attribute sudah digunakan.',
+    'uuid' => ':Attribute harus berupa UUID yang valid.',
+
+    'attributes' => [
+        'email' => 'email',
+        'password' => 'password',
+        'nama' => 'nama',
+        'role' => 'peran',
+        'kas_awal' => 'kas awal',
+        'kas_akhir' => 'kas akhir',
+        'catatan' => 'catatan',
+        'kode_produk' => 'kode produk',
+        'nama_produk' => 'nama produk',
+        'category_id' => 'kategori',
+        'harga_beli' => 'harga beli',
+        'harga_jual' => 'harga jual',
+        'stok' => 'stok awal',
+        'stok_minimum' => 'stok minimum',
+        'nama_kategori' => 'nama kategori',
+        'nama_supplier' => 'nama supplier',
+        'telepon' => 'nomor telepon',
+        'alamat' => 'alamat',
+        'supplier_id' => 'supplier',
+        'tanggal' => 'tanggal',
+        'no_faktur' => 'nomor faktur',
+        'keterangan' => 'keterangan',
+        'items' => 'daftar produk',
+        'items.*.product_id' => 'produk',
+        'items.*.qty' => 'jumlah',
+        'items.*.harga_beli' => 'harga beli',
+        'product_id' => 'produk',
+        'nilai' => 'jumlah stok',
+        'alasan' => 'alasan',
+        'diskon' => 'diskon',
+        'metode_bayar' => 'metode pembayaran',
+        'uang_diterima' => 'uang diterima',
+        'referensi_bayar' => 'nomor referensi',
+    ],
+];
