@@ -10,10 +10,19 @@ class AuthTest extends TestCase
 {
     use RefreshDatabase;
 
-    public function test_guest_is_redirected_to_login(): void
+    public function test_guest_sees_landing_page_and_is_redirected_from_app_pages(): void
     {
-        $this->get('/')->assertRedirect(route('login'));
+        $this->get('/')->assertOk()->assertSee('TokoKasir')->assertSee('Masuk ke Aplikasi');
+        $this->get(route('home'))->assertRedirect(route('login'));
         $this->get(route('admin.dashboard'))->assertRedirect(route('login'));
+    }
+
+    public function test_landing_page_links_logged_in_user_to_dashboard(): void
+    {
+        $this->actingAs($this->user(User::ROLE_PEMILIK));
+
+        $this->get('/')->assertOk()->assertSee('Buka Dashboard')->assertSee(route('home'));
+        $this->get(route('home'))->assertRedirect(route('pemilik.dashboard'));
     }
 
     public function test_login_redirects_each_role_to_its_home(): void

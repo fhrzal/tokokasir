@@ -68,6 +68,7 @@ barang masuk, penyesuaian stok, dan perhitungan laba.
 
 | Kode | Use case | Aktor | Halaman / Kode |
 |---|---|---|---|
+| – | Beranda publik | Semua | `/` · `resources/views/landing.blade.php` |
 | UC-01 | Login / Logout | Semua | `/login` · `Auth/LoginController` · middleware `role` |
 | UC-02 | Transaksi penjualan | Kasir | `/kasir/transaksi` · `Kasir/PosController` · `resources/js/pos.js` · `Services/CheckoutService` |
 | UC-03 | Pembayaran multi-metode | Kasir | Modal pembayaran (tunai / transfer / QRIS) |
