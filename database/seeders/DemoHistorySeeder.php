@@ -4,6 +4,7 @@ namespace Database\Seeders;
 
 use App\Models\Product;
 use App\Models\Shift;
+use App\Models\ShiftSchedule;
 use App\Models\Supplier;
 use App\Models\User;
 use App\Services\CheckoutService;
@@ -27,6 +28,12 @@ class DemoHistorySeeder extends Seeder
 
     /** Produk yang sengaja tidak di-restock agar peringatan stok terlihat. */
     private const NEGLECTED = ['8998866104005', '8993093665013', '8993560025012'];
+
+    /** Jam kerja [mulai, selesai] per kasir sesuai urutan akun. */
+    private const JAM_KERJA = [[7, 14], [14, 21]];
+
+    /** Jumlah hari ke depan yang sudah dijadwalkan. */
+    private const UPCOMING_DAYS = 14;
 
     private Collection $products;
 
@@ -102,13 +109,15 @@ class DemoHistorySeeder extends Seeder
             $busy = $date->isWeekend() ? 1.4 : 1.0;
 
             foreach ($cashiers as $index => $cashier) {
-                // Setiap kasir libur satu hari dalam seminggu.
-                if ($date->dayOfWeek === ($index === 0 ? 1 : 3)) {
+                if ($this->isDayOff($index, $date)) {
                     continue;
                 }
 
-                $open = $date->setTime($index === 0 ? 7 : 14, mt_rand(0, 10));
-                $close = $date->setTime($index === 0 ? 14 : 21, mt_rand(0, 15));
+                [$jamMulai, $jamSelesai] = self::JAM_KERJA[$index % 2];
+                $scheduleStart = $date->setTime($jamMulai, 0);
+                $scheduleEnd = $date->setTime($jamSelesai, 0);
+                $open = $date->setTime($jamMulai, mt_rand(0, 10));
+                $close = $date->setTime($jamSelesai, mt_rand(0, 15));
 
                 if ($isToday) {
                     // Hari ini: hanya kasir kedua yang sudah menyelesaikan shift pagi,
@@ -116,22 +125,79 @@ class DemoHistorySeeder extends Seeder
                     if ($index !== 1) {
                         continue;
                     }
-                    $open = $date->setTime(7, 0);
-                    $close = $realNow->subMinutes(10);
+                    $open = $scheduleStart = $date->setTime(7, 0);
+                    $close = $scheduleEnd = $realNow->subMinutes(10);
                 }
 
-                $this->simulateShift($cashier, $open, $close, (int) round(mt_rand(10, 18) * $busy));
+                $this->at($scheduleStart->subDay());
+                $schedule = $this->schedule($cashier, $admin, $scheduleStart, $scheduleEnd);
+
+                // Contoh kasir yang tidak hadir sesuai jadwal.
+                if ($day === 17 && $index === 1) {
+                    continue;
+                }
+
+                $this->simulateShift($cashier, $schedule, $open, $close, (int) round(mt_rand(10, 18) * $busy));
             }
         }
 
         Carbon::setTestNow();
         CarbonImmutable::setTestNow();
+
+        $this->upcomingSchedules($admin, $cashiers, $realNow);
     }
 
-    private function simulateShift(User $cashier, CarbonImmutable $open, CarbonImmutable $close, int $count): void
+    /**
+     * Jadwal ke depan. Kasir pertama mendapat jadwal yang sedang berlangsung
+     * agar alur masuk dan buka shift bisa langsung dicoba setelah seeding.
+     */
+    private function upcomingSchedules(User $admin, Collection $cashiers, CarbonImmutable $now): void
+    {
+        $start = $now->startOfHour();
+        $this->schedule($cashiers[0], $admin, $start, $start->addHours(8), 'Jadwal demo');
+
+        for ($day = 1; $day <= self::UPCOMING_DAYS; $day++) {
+            $date = $now->startOfDay()->addDays($day);
+
+            foreach ($cashiers as $index => $cashier) {
+                if ($this->isDayOff($index, $date)) {
+                    continue;
+                }
+
+                [$jamMulai, $jamSelesai] = self::JAM_KERJA[$index % 2];
+                $this->schedule($cashier, $admin, $date->setTime($jamMulai, 0), $date->setTime($jamSelesai, 0));
+            }
+        }
+    }
+
+    private function schedule(User $cashier, User $admin, CarbonImmutable $start, CarbonImmutable $end, ?string $catatan = null): ?ShiftSchedule
+    {
+        if (ShiftSchedule::overlapping($cashier->user_id, $start, $end)->exists()) {
+            return null;
+        }
+
+        return $cashier->schedules()->create([
+            'waktu_mulai' => $start,
+            'waktu_selesai' => $end,
+            'catatan' => $catatan,
+            'dibuat_oleh' => $admin->user_id,
+        ]);
+    }
+
+    /** Setiap kasir libur satu hari dalam seminggu (Senin / Rabu). */
+    private function isDayOff(int $index, CarbonImmutable $date): bool
+    {
+        return $date->dayOfWeek === ($index === 0 ? 1 : 3);
+    }
+
+    private function simulateShift(User $cashier, ?ShiftSchedule $schedule, CarbonImmutable $open, CarbonImmutable $close, int $count): void
     {
         $this->at($open);
-        $shift = $cashier->shifts()->create(['kas_awal' => [150000, 200000, 250000][mt_rand(0, 2)], 'waktu_buka' => now()]);
+        $shift = $cashier->shifts()->create([
+            'schedule_id' => $schedule?->schedule_id,
+            'kas_awal' => [150000, 200000, 250000][mt_rand(0, 2)],
+            'waktu_buka' => now(),
+        ]);
 
         $span = max(1, $open->diffInSeconds($close) - 600);
         $times = collect(range(1, $count))->map(fn () => mt_rand(300, $span))->sort()->values();

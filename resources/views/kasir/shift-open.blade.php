@@ -8,6 +8,11 @@
             <p class="text-sm text-slate-300">{{ now()->translatedFormat('l, d F Y') }}</p>
             <h1 class="mt-1 text-2xl font-bold">Halo, {{ auth()->user()->nama }}</h1>
             <p class="mt-1 text-sm text-slate-300">Hitung uang tunai di laci kasir lalu catat sebagai kas awal untuk membuka shift.</p>
+            @if ($schedule)
+                <p class="mt-4 inline-flex items-center gap-2 rounded-full bg-white/10 px-3 py-1 text-sm font-medium">
+                    <x-icon name="calendar" class="size-4" />Jadwal Anda: {{ $schedule->timeLabel() }}
+                </p>
+            @endif
         </div>
 
         <form method="POST" action="{{ route('kasir.shift.store') }}" class="space-y-5 p-6"

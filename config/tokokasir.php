@@ -30,6 +30,21 @@ return [
 
     'qris_image' => env('TOKO_QRIS_IMAGE', 'images/qris.png'),
 
+    /*
+    |--------------------------------------------------------------------------
+    | Jadwal shift kasir
+    |--------------------------------------------------------------------------
+    |
+    | Kasir hanya dapat masuk dan membuka shift sesuai jadwal yang dibuat admin
+    | atau pemilik toko. Toleransi (menit) berlaku untuk:
+    | - masuk/buka shift paling cepat sekian menit sebelum jadwal mulai,
+    | - menutup shift paling cepat sekian menit sebelum jadwal selesai,
+    | - menyelesaikan transaksi terakhir hingga sekian menit setelah jadwal selesai.
+    |
+    */
+
+    'jadwal_toleransi' => (int) env('TOKO_JADWAL_TOLERANSI', 15),
+
     'metode_bayar' => [
         'tunai' => 'Tunai',
         'transfer' => 'Transfer',

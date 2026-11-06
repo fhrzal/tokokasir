@@ -284,7 +284,8 @@ export default (config) => ({
             } else if (response.status === 419) {
                 this.error = 'Sesi telah berakhir. Muat ulang halaman lalu coba lagi.';
             } else if (response.status === 409) {
-                window.location.href = config.shiftUrl;
+                // Shift belum dibuka atau jadwal sudah berakhir.
+                window.location.href = data.redirect || config.shiftUrl;
             } else {
                 this.error = data.message || 'Terjadi kesalahan pada server. Coba lagi.';
             }

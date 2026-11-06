@@ -5,6 +5,7 @@ use App\Http\Controllers\Auth\LoginController;
 use App\Http\Controllers\Kasir;
 use App\Http\Controllers\Pemilik;
 use App\Http\Controllers\ReceiptController;
+use App\Http\Controllers\ScheduleController;
 use Illuminate\Support\Facades\Route;
 
 /*
@@ -35,7 +36,7 @@ Route::middleware('auth')->group(function () {
 |--------------------------------------------------------------------------
 */
 
-Route::middleware(['auth', 'role:kasir'])->prefix('kasir')->name('kasir.')->group(function () {
+Route::middleware(['auth', 'role:kasir', 'jadwal'])->prefix('kasir')->name('kasir.')->group(function () {
     Route::get('/shift/buka', [Kasir\ShiftController::class, 'create'])->name('shift.create');
     Route::post('/shift/buka', [Kasir\ShiftController::class, 'store'])->name('shift.store');
     Route::get('/shift/{shift}/ringkasan', [Kasir\ShiftController::class, 'show'])->name('shift.show');
@@ -84,6 +85,18 @@ Route::middleware(['auth', 'role:admin'])->prefix('admin')->name('admin.')->grou
         ->except(['show', 'destroy'])
         ->parameters(['pengguna' => 'user']);
     Route::patch('/pengguna/{user}/status', [Admin\UserController::class, 'toggle'])->name('pengguna.toggle');
+});
+
+/*
+|--------------------------------------------------------------------------
+| Jadwal shift kasir: admin dan pemilik toko
+|--------------------------------------------------------------------------
+*/
+
+Route::middleware(['auth', 'role:admin,pemilik'])->group(function () {
+    Route::resource('jadwal', ScheduleController::class)
+        ->only(['index', 'store', 'edit', 'update', 'destroy'])
+        ->parameters(['jadwal' => 'schedule']);
 });
 
 /*

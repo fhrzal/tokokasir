@@ -14,6 +14,7 @@ return Application::configure(basePath: dirname(__DIR__))
         $middleware->alias([
             'role' => \App\Http\Middleware\EnsureRole::class,
             'shift.open' => \App\Http\Middleware\EnsureOpenShift::class,
+            'jadwal' => \App\Http\Middleware\EnsureKasirSchedule::class,
         ]);
 
         $middleware->redirectGuestsTo(fn () => route('login'));

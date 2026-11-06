@@ -10,6 +10,7 @@
             ['route' => 'admin.supplier.index', 'active' => 'admin.supplier.*', 'icon' => 'truck', 'label' => 'Data Supplier'],
             ['route' => 'admin.barang-masuk.index', 'active' => 'admin.barang-masuk.*', 'icon' => 'inbox', 'label' => 'Barang Masuk'],
             ['route' => 'admin.stok.index', 'active' => 'admin.stok.*', 'icon' => 'adjustments', 'label' => 'Stok & Penyesuaian', 'badge' => $restockCount],
+            ['route' => 'jadwal.index', 'active' => 'jadwal.*', 'icon' => 'calendar', 'label' => 'Jadwal Kasir'],
             ['route' => 'admin.pengguna.index', 'active' => 'admin.pengguna.*', 'icon' => 'users', 'label' => 'Akun Pengguna'],
         ],
         'pemilik' => [
@@ -17,6 +18,7 @@
             ['route' => 'pemilik.laporan.penjualan', 'active' => 'pemilik.laporan.penjualan', 'icon' => 'chart', 'label' => 'Laporan Penjualan'],
             ['route' => 'pemilik.laporan.stok', 'active' => 'pemilik.laporan.stok', 'icon' => 'archive', 'label' => 'Laporan Stok', 'badge' => $restockCount],
             ['route' => 'pemilik.laporan.laba', 'active' => 'pemilik.laporan.laba', 'icon' => 'profit', 'label' => 'Laba & Aktivitas Kasir'],
+            ['route' => 'jadwal.index', 'active' => 'jadwal.*', 'icon' => 'calendar', 'label' => 'Jadwal Kasir'],
         ],
         default => [
             ['route' => 'kasir.pos', 'active' => 'kasir.pos', 'icon' => 'cart', 'label' => 'Transaksi'],
@@ -57,19 +59,22 @@
                     @if ($user->openShift)
                         <span class="hidden items-center gap-1.5 rounded-full bg-emerald-500/15 px-3 py-1 text-xs font-medium text-emerald-300 lg:inline-flex">
                             <span class="size-1.5 rounded-full bg-emerald-400"></span>
-                            Shift sejak {{ $user->openShift->waktu_buka->format('H:i') }}
+                            Shift sejak {{ $user->openShift->waktu_buka->format('H:i') }}@if ($user->openShift->schedule) · jadwal s.d. {{ $user->openShift->schedule->waktu_selesai->format('H:i') }}@endif
                         </span>
                     @endif
                     <div class="hidden text-right text-sm leading-tight sm:block">
                         <div class="font-semibold">{{ $user->nama }}</div>
                         <div class="text-xs text-slate-400">{{ $user->roleLabel() }}</div>
                     </div>
-                    <form method="POST" action="{{ route('logout') }}">
-                        @csrf
-                        <button type="submit" class="btn btn-sm bg-white/10 text-white hover:bg-white/20" title="Keluar">
-                            <x-icon name="logout" class="size-4" /><span class="hidden sm:inline">Keluar</span>
-                        </button>
-                    </form>
+                    {{-- Kasir baru dapat keluar setelah menutup shift. --}}
+                    @unless ($user->openShift)
+                        <form method="POST" action="{{ route('logout') }}">
+                            @csrf
+                            <button type="submit" class="btn btn-sm bg-white/10 text-white hover:bg-white/20" title="Keluar">
+                                <x-icon name="logout" class="size-4" /><span class="hidden sm:inline">Keluar</span>
+                            </button>
+                        </form>
+                    @endunless
                     <button type="button" class="md:hidden" @click="open = !open" aria-label="Menu"><x-icon name="menu" class="size-6" /></button>
                 </div>
             </div>

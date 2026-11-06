@@ -49,7 +49,9 @@ Buka <http://127.0.0.1:8000>. Agar bisa diakses dari tablet/komputer lain di jar
 | Pemilik Toko | `pemilik@tokokasir.test` |
 
 Seeder membuat 37 produk, 4 supplier, ±800 transaksi, dan riwayat shift 30 hari terakhir
-melalui service aplikasi, sehingga stok, kartu stok, dan laporan saling konsisten.
+melalui service aplikasi, sehingga stok, kartu stok, dan laporan saling konsisten. Seeder juga
+membuat jadwal shift 14 hari ke depan; kasir pertama mendapat jadwal 8 jam mulai jam saat seeder
+dijalankan agar dapat langsung masuk. Di luar jadwal, tambahkan jadwal kasir lewat akun admin.
 Jalankan ulang dengan `php artisan migrate:fresh --seed`.
 
 ### 5. Pengujian
@@ -59,7 +61,7 @@ php artisan test
 ```
 
 Pengujian memakai database `tokokasir_test` (lihat `phpunit.xml`), mencakup autentikasi & hak akses,
-transaksi (harga dari server, stok kurang, transaksi ganda, uang kurang), shift & selisih kas,
+transaksi (harga dari server, stok kurang, transaksi ganda, uang kurang), shift & selisih kas, jadwal shift kasir,
 barang masuk, penyesuaian stok, dan perhitungan laba.
 
 ---
@@ -73,6 +75,7 @@ barang masuk, penyesuaian stok, dan perhitungan laba.
 | UC-03 | Pembayaran multi-metode | Kasir | Modal pembayaran (tunai / transfer / QRIS) |
 | UC-04 | Cetak / simpan struk | Kasir | `/struk/{id}` (printer thermal 58/80 mm) · `/struk/{id}/pdf` |
 | UC-05 | Kas awal & kas akhir (shift) | Kasir | `/kasir/shift/buka` · `/kasir/shift/tutup` · `Kasir/ShiftController` |
+| – | Jadwal shift kasir | Admin, Pemilik | `/jadwal` · `ScheduleController` · middleware `jadwal` (`EnsureKasirSchedule`) |
 | UC-06 | Produk & kategori | Admin | `/admin/produk` · `/admin/kategori` |
 | UC-07 | Supplier | Admin | `/admin/supplier` |
 | UC-08 | Barang masuk | Admin | `/admin/barang-masuk` · `Services/PurchaseService` |
@@ -97,6 +100,17 @@ barang masuk, penyesuaian stok, dan perhitungan laba.
 - **Semua perubahan stok** melewati `Services/StockService` dan tercatat di `stock_movements`.
   Stok produk tidak dapat diedit langsung dari form produk.
 - **Selisih kas** = kas akhir − (kas awal + penjualan tunai). Transfer dan QRIS tidak masuk laci.
+- **Jadwal shift kasir** dibuat admin atau pemilik di `/jadwal` (per tanggal atau rentang tanggal dengan
+  pilihan hari; jam selesai lebih kecil dari jam mulai berarti melewati tengah malam). Kasir:
+  - hanya dapat masuk dan membuka shift mulai 15 menit sebelum jadwal hingga jadwal selesai;
+    satu jadwal hanya untuk satu shift;
+  - tidak dapat keluar selama shift masih terbuka, dan baru dapat menutup shift mulai 15 menit
+    sebelum jadwal selesai. Bila kasir perlu pulang lebih awal, admin/pemilik mengubah jam selesai;
+  - masih dapat bertransaksi hingga 15 menit setelah jadwal selesai, setelah itu hanya dapat
+    menutup shift; sesi tanpa jadwal yang berlaku langsung diakhiri.
+
+  Toleransi 15 menit diatur dengan `TOKO_JADWAL_TOLERANSI`. Halaman jadwal menampilkan kehadiran
+  (hadir, terlambat, tidak hadir) berdasarkan jam buka/tutup shift yang sebenarnya.
 - **Pembayaran transfer/QRIS** dicatat manual tanpa payment gateway, sesuai ruang lingkup.
   Letakkan gambar QRIS statis toko di `public/images/qris.png` agar tampil di layar pembayaran,
   dan atur nomor rekening pada `TOKO_REKENING` di `.env`.
@@ -115,6 +129,7 @@ TOKO_ALAMAT="Jl. Ahmad Dahlan No. 76, Kediri"
 TOKO_TELEPON="0812-3456-7890"
 TOKO_REKENING="BCA 1234567890 a.n. TokoKasir Mart"
 TOKO_FOOTER="Terima kasih atas kunjungan Anda"
+TOKO_JADWAL_TOLERANSI=15
 ```
 
 ## Struktur penting
@@ -130,5 +145,5 @@ resources/
 ├── views/{kasir,admin,pemilik,receipts,components,layouts}
 └── js/  pos.js (halaman kasir), purchase-form.js, charts.js
 database/seeders/   UserSeeder, CatalogSeeder, DemoHistorySeeder
-tests/Feature/      AuthTest, CheckoutTest, ShiftTest, InventoryTest, ReportTest
+tests/Feature/      AuthTest, CheckoutTest, ShiftTest, ScheduleTest, InventoryTest, ReportTest
 ```

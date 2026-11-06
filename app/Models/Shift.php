@@ -12,6 +12,7 @@ class Shift extends Model
 
     protected $fillable = [
         'user_id',
+        'schedule_id',
         'kas_awal',
         'kas_akhir',
         'kas_seharusnya',
@@ -38,6 +39,11 @@ class Shift extends Model
         return $this->belongsTo(User::class, 'user_id');
     }
 
+    public function schedule(): BelongsTo
+    {
+        return $this->belongsTo(ShiftSchedule::class, 'schedule_id');
+    }
+
     public function transactions(): HasMany
     {
         return $this->hasMany(Transaction::class, 'shift_id');
@@ -46,6 +52,12 @@ class Shift extends Model
     public function isOpen(): bool
     {
         return $this->waktu_tutup === null;
+    }
+
+    /** Shift baru boleh ditutup menjelang jadwal selesai; shift tanpa jadwal bebas ditutup. */
+    public function canBeClosed(): bool
+    {
+        return ! $this->schedule || now()->gte($this->schedule->closableAt());
     }
 
     /**

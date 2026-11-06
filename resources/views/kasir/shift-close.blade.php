@@ -4,7 +4,14 @@
 @section('content')
 <div class="mx-auto max-w-3xl">
     <x-page-header title="Tutup Shift"
-                   :subtitle="'Dibuka ' . $shift->waktu_buka->translatedFormat('l, d F Y H:i') . ' · ' . $shift->waktu_buka->diffForHumans(null, true) . ' berjalan'" />
+                   :subtitle="'Dibuka ' . $shift->waktu_buka->translatedFormat('l, d F Y H:i') . ' · ' . $shift->waktu_buka->diffForHumans(null, true) . ' berjalan' . ($shift->schedule ? ' · Jadwal ' . $shift->schedule->timeLabel() : '')" />
+
+    @if ($earlyCloseMessage)
+        <div class="mb-5 flex items-start gap-3 rounded-lg bg-slate-100 px-4 py-3 text-sm text-slate-700 ring-1 ring-slate-200 ring-inset">
+            <x-icon name="clock" class="mt-0.5 size-5 shrink-0 text-slate-500" />
+            <p>{{ $earlyCloseMessage }}</p>
+        </div>
+    @endif
 
     <div class="grid gap-6 md:grid-cols-5">
         <div class="card md:col-span-2">
@@ -54,7 +61,7 @@
                 <textarea id="catatan" name="catatan" rows="2" maxlength="255" class="input" placeholder="Mis. alasan selisih kas">{{ old('catatan') }}</textarea>
             </div>
 
-            <button type="submit" class="btn btn-danger btn-lg w-full"><x-icon name="power" class="size-5" />Tutup Shift</button>
+            <button type="submit" class="btn btn-danger btn-lg w-full disabled:cursor-not-allowed disabled:opacity-50" @disabled($earlyCloseMessage)><x-icon name="power" class="size-5" />Tutup Shift</button>
         </form>
     </div>
 </div>

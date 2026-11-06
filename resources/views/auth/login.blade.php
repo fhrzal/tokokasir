@@ -57,6 +57,7 @@
             @if (app()->environment('local'))
                 <div class="mt-8 rounded-lg bg-white p-4 text-xs text-slate-600 ring-1 ring-slate-200">
                     <p class="mb-2 font-semibold text-slate-700">Akun demo (password: <code>password</code>)</p>
+                    <p class="mb-2 text-slate-500">Kasir hanya dapat masuk sesuai jadwal shift.</p>
                     <ul class="space-y-1">
                         <li><span class="badge badge-blue mr-1">Kasir</span> kasir@tokokasir.test</li>
                         <li><span class="badge badge-violet mr-1">Admin</span> admin@tokokasir.test</li>

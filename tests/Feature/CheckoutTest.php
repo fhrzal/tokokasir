@@ -15,6 +15,7 @@ class CheckoutTest extends TestCase
     public function test_kasir_must_open_shift_before_transacting(): void
     {
         $kasir = $this->user();
+        $this->schedule($kasir);
 
         $this->actingAs($kasir)->get(route('kasir.pos'))->assertRedirect(route('kasir.shift.create'));
 
@@ -26,6 +27,7 @@ class CheckoutTest extends TestCase
     public function test_opening_shift_twice_keeps_single_open_shift(): void
     {
         $kasir = $this->user();
+        $this->schedule($kasir);
         $this->actingAs($kasir);
 
         $this->post(route('kasir.shift.store'), ['kas_awal' => 100000]);

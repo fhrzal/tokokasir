@@ -5,10 +5,15 @@
 <div class="mx-auto max-w-md">
     <div class="no-print mb-4 flex flex-wrap gap-2">
         <button type="button" onclick="window.print()" class="btn btn-secondary"><x-icon name="printer" class="size-4" />Cetak</button>
-        @if (! auth()->user()->openShift()->exists())
+        @if ($canOpenShift)
             <a href="{{ route('kasir.shift.create') }}" class="btn btn-primary"><x-icon name="power" class="size-4" />Buka Shift Baru</a>
         @endif
     </div>
+    @if ($nextSchedule)
+        <p class="no-print mb-4 flex items-center gap-2 text-sm text-slate-600">
+            <x-icon name="calendar" class="size-4 text-slate-400" />Jadwal berikutnya: {{ $nextSchedule->longLabel() }}
+        </p>
+    @endif
 
     <div class="print-area card p-6 font-mono text-sm">
         <div class="text-center">
@@ -19,6 +24,7 @@
         @php
             $rows = [
                 'Kasir' => $shift->user->nama,
+                'Jadwal' => $shift->schedule?->timeLabel() ?? '-',
                 'Buka' => $shift->waktu_buka->format('d/m/Y H:i'),
                 'Tutup' => $shift->waktu_tutup?->format('d/m/Y H:i') ?? '-',
             ];

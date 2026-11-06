@@ -12,7 +12,8 @@ class ShiftTest extends TestCase
     public function test_closing_shift_records_expected_cash_and_difference(): void
     {
         $kasir = $this->user();
-        $shift = $this->openShift($kasir, 100000);
+        // Jadwal hampir selesai sehingga shift sudah boleh ditutup.
+        $shift = $this->openShift($kasir, 100000, $this->schedule($kasir, -480, 5));
         $product = $this->product(['harga_jual' => 10000, 'stok' => 50]);
 
         $this->actingAs($kasir);
@@ -29,9 +30,11 @@ class ShiftTest extends TestCase
         $this->assertEquals(-2000, $shift->selisih);
         $this->assertNotNull($shift->waktu_tutup);
 
-        // Setelah shift ditutup, kasir tidak dapat bertransaksi.
-        $this->get(route('kasir.pos'))->assertRedirect(route('kasir.shift.create'));
+        // Ringkasan masih dapat dilihat, tetapi transaksi tidak lagi bisa dilakukan.
+        // Jadwal sudah dipakai sehingga kasir dikeluarkan dari sesi.
+        $this->get(route('kasir.shift.show', $shift))->assertOk();
         $this->postJson(route('kasir.pos.store'), ['items' => [['product_id' => $product->product_id, 'qty' => 1]], 'metode_bayar' => 'qris'])
             ->assertStatus(409);
+        $this->assertGuest();
     }
 }

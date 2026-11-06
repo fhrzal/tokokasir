@@ -3,6 +3,8 @@
 namespace App\Http\Controllers\Auth;
 
 use App\Http\Controllers\Controller;
+use App\Models\ShiftSchedule;
+use App\Models\User;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
@@ -37,13 +39,31 @@ class LoginController extends Controller
             ]);
         }
 
+        // Kasir hanya dapat masuk sesuai jadwal shift, kecuali masih ada shift
+        // terbuka yang harus ditutup.
+        $user = Auth::user();
+        if ($user->hasRole(User::ROLE_KASIR) && ! $user->openShift()->exists() && ! $user->currentSchedule()) {
+            Auth::logout();
+
+            throw ValidationException::withMessages([
+                'email' => ShiftSchedule::unavailableMessage($user),
+            ]);
+        }
+
         $request->session()->regenerate();
 
-        return redirect()->intended(Auth::user()->homeRoute());
+        return redirect()->intended($user->homeRoute());
     }
 
     public function destroy(Request $request): RedirectResponse
     {
+        $user = $request->user();
+
+        if ($user->hasRole(User::ROLE_KASIR) && $user->openShift()->exists()) {
+            return redirect()->route('kasir.shift.edit')
+                ->with('warning', 'Tutup shift terlebih dahulu sebelum keluar.');
+        }
+
         Auth::guard('web')->logout();
 
         $request->session()->invalidate();

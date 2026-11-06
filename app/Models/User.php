@@ -68,6 +68,19 @@ class User extends Authenticatable
         return $this->hasOne(Shift::class, 'user_id')->whereNull('waktu_tutup')->latestOfMany('waktu_buka');
     }
 
+    public function schedules(): HasMany
+    {
+        return $this->hasMany(ShiftSchedule::class, 'user_id');
+    }
+
+    /**
+     * Jadwal kasir yang sedang membuka akses masuk dan belum ditutup shift-nya.
+     */
+    public function currentSchedule(): ?ShiftSchedule
+    {
+        return $this->schedules()->current()->first();
+    }
+
     public function transactions(): HasMany
     {
         return $this->hasMany(Transaction::class, 'user_id');

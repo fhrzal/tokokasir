@@ -33,6 +33,9 @@ class AuthTest extends TestCase
 
         foreach ($cases as $role => $home) {
             $user = $this->user($role);
+            if ($role === User::ROLE_KASIR) {
+                $this->schedule($user);
+            }
 
             $this->post(route('login'), ['email' => $user->email, 'password' => 'password'])
                 ->assertRedirect($home);
