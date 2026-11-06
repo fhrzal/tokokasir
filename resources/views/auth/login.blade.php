@@ -12,27 +12,15 @@
     <div class="relative hidden w-1/2 flex-col justify-between overflow-hidden bg-slate-900 p-12 text-white lg:flex">
         <div class="absolute -right-24 -top-24 size-96 rounded-full bg-brand-500/20 blur-3xl"></div>
         <div class="absolute -bottom-32 -left-16 size-96 rounded-full bg-brand-400/10 blur-3xl"></div>
-        <a href="{{ route('landing') }}" class="relative flex w-fit items-center gap-3">
+        <div class="relative flex items-center gap-3">
             <span class="grid size-11 place-items-center rounded-xl bg-brand-500"><x-icon name="store" class="size-6" /></span>
             <span class="text-xl font-bold">TokoKasir</span>
-        </a>
-        <div class="relative max-w-md">
-            <h1 class="text-4xl font-bold leading-tight">Kasir cepat, stok rapi, laporan selalu siap.</h1>
-            <p class="mt-4 text-slate-300">Sistem Point of Sale berbasis web untuk mendukung penjualan dan pengelolaan stok toko retail.</p>
-            <ul class="mt-8 space-y-3 text-sm text-slate-300">
-                <li class="flex items-center gap-3"><x-icon name="barcode" class="size-5 text-brand-300" />Transaksi dengan pencarian atau barcode scanner</li>
-                <li class="flex items-center gap-3"><x-icon name="banknotes" class="size-5 text-brand-300" />Pembayaran tunai, transfer, dan QRIS</li>
-                <li class="flex items-center gap-3"><x-icon name="chart" class="size-5 text-brand-300" />Dashboard penjualan, laba, dan stok</li>
-            </ul>
         </div>
         <p class="relative text-xs text-slate-500">&copy; {{ date('Y') }} {{ config('tokokasir.nama') }}</p>
     </div>
 
     <div class="flex flex-1 items-center justify-center p-6">
         <div class="w-full max-w-sm">
-            <a href="{{ route('landing') }}" class="mb-8 inline-flex items-center gap-1.5 text-sm font-medium text-slate-500 hover:text-slate-800">
-                <x-icon name="arrow-left" class="size-4" />Kembali ke beranda
-            </a>
             <div class="mb-8 flex items-center gap-3 lg:hidden">
                 <span class="grid size-10 place-items-center rounded-xl bg-brand-600 text-white"><x-icon name="store" class="size-6" /></span>
                 <span class="text-xl font-bold text-slate-900">TokoKasir</span>

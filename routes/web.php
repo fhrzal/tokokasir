@@ -7,9 +7,6 @@ use App\Http\Controllers\Pemilik;
 use App\Http\Controllers\ReceiptController;
 use Illuminate\Support\Facades\Route;
 
-// Halaman beranda publik.
-Route::view('/', 'landing')->name('landing');
-
 /*
 |--------------------------------------------------------------------------
 | UC-01 Login / Logout
@@ -25,7 +22,7 @@ Route::middleware('auth')->group(function () {
     Route::post('/logout', [LoginController::class, 'destroy'])->name('logout');
 
     // Mengalihkan pengguna ke halaman awal sesuai peran.
-    Route::get('/dashboard', fn () => redirect(auth()->user()->homeRoute()))->name('home');
+    Route::get('/', fn () => redirect(auth()->user()->homeRoute()))->name('home');
 
     // UC-04 Struk: kasir (miliknya sendiri), admin, dan pemilik.
     Route::get('/struk/{transaction}', [ReceiptController::class, 'show'])->name('struk.show');
