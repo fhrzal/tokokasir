@@ -20,13 +20,76 @@
     {{-- ============ Daftar produk ============ --}}
     <section class="flex min-h-0 min-w-0 flex-col">
         <div class="space-y-3 border-b border-slate-200 bg-white p-4">
-            <div class="relative">
-                <x-icon name="search" class="pointer-events-none absolute top-1/2 left-3.5 size-5 -translate-y-1/2 text-slate-400" />
-                <input x-ref="search" x-model="query" @keydown.enter.prevent="searchEnter()" type="search" autocomplete="off"
-                       class="input py-3 pr-24 pl-11 text-base" placeholder="Cari nama / kode produk atau scan barcode…">
-                <span class="pointer-events-none absolute top-1/2 right-3 hidden -translate-y-1/2 items-center gap-1 text-xs text-slate-400 sm:flex">
-                    <x-icon name="barcode" class="size-4" /> F2
-                </span>
+            <div class="flex gap-2">
+                <div class="relative min-w-0 flex-1">
+                    <x-icon name="search" class="pointer-events-none absolute top-1/2 left-3.5 size-5 -translate-y-1/2 text-slate-400" />
+                    <input x-ref="search" x-model="query" @keydown.enter.prevent="searchEnter()" type="search" autocomplete="off"
+                           class="input py-3 pr-14 pl-11 text-base" placeholder="Cari produk atau scan barcode…">
+                    <span class="pointer-events-none absolute top-1/2 right-3 hidden -translate-y-1/2 items-center gap-1 text-xs text-slate-400 sm:flex">
+                        <x-icon name="barcode" class="size-4" /> F2
+                    </span>
+                </div>
+                <button type="button" @click="toggleCamera()" class="btn shrink-0 px-3.5"
+                        :class="camera.open ? 'bg-slate-900 text-white hover:bg-slate-800' : 'btn-secondary'"
+                        :aria-pressed="camera.open" title="Scan barcode dengan kamera">
+                    <x-icon name="camera" class="size-5" /><span class="hidden lg:inline" x-text="camera.open ? 'Tutup Kamera' : 'Scan Kamera'"></span>
+                </button>
+            </div>
+
+            {{-- ============ Scan barcode lewat kamera ============ --}}
+            <div x-show="camera.open" x-cloak class="relative overflow-hidden rounded-xl bg-slate-950 ring-4 transition-shadow duration-150"
+                 :class="camera.feedback ? (camera.feedback.ok ? 'ring-emerald-400' : 'ring-red-500') : 'ring-transparent'">
+                <video x-ref="video" playsinline muted autoplay class="block h-48 w-full object-cover sm:h-56 xl:h-64"></video>
+
+                {{-- Bingkai bidik: hanya area ini yang dipindai (lebar 80%, tinggi 50%). --}}
+                <div class="pointer-events-none absolute inset-0 flex items-center justify-center" x-show="!camera.error">
+                    <div class="relative h-1/2 w-4/5 rounded-lg shadow-[0_0_0_100vmax_rgb(2_6_23/0.45)]">
+                        <span class="absolute -top-0.5 -left-0.5 size-6 rounded-tl-lg border-t-4 border-l-4 border-white"></span>
+                        <span class="absolute -top-0.5 -right-0.5 size-6 rounded-tr-lg border-t-4 border-r-4 border-white"></span>
+                        <span class="absolute -bottom-0.5 -left-0.5 size-6 rounded-bl-lg border-b-4 border-l-4 border-white"></span>
+                        <span class="absolute -right-0.5 -bottom-0.5 size-6 rounded-br-lg border-r-4 border-b-4 border-white"></span>
+                        <span class="absolute inset-x-3 top-1/2 h-0.5 -translate-y-1/2 animate-pulse rounded-full bg-red-500 shadow-[0_0_8px_rgb(239_68_68)]"></span>
+                    </div>
+                </div>
+
+                <div x-show="camera.starting && !camera.error" class="absolute inset-0 grid place-items-center bg-slate-950/70 text-sm text-slate-200">
+                    <span class="flex items-center gap-2">
+                        <svg class="size-5 animate-spin" viewBox="0 0 24 24" fill="none"><circle cx="12" cy="12" r="10" stroke="currentColor" stroke-width="3" class="opacity-25"/><path d="M4 12a8 8 0 018-8" stroke="currentColor" stroke-width="3" stroke-linecap="round"/></svg>
+                        Menyalakan kamera…
+                    </span>
+                </div>
+
+                <div x-show="camera.error" class="absolute inset-0 flex flex-col items-center justify-center gap-3 bg-slate-900 p-6 text-center text-sm text-slate-200">
+                    <x-icon name="camera" class="size-8 text-slate-500" />
+                    <p class="max-w-md text-pretty" x-text="camera.error"></p>
+                    <button type="button" @click="startCamera()" class="btn btn-sm bg-white/10 text-white hover:bg-white/20" x-show="!camera.error.includes('HTTPS')">Coba lagi</button>
+                </div>
+
+                {{-- Kontrol kamera --}}
+                <div class="absolute top-2 right-2 flex gap-1.5" x-show="!camera.error && !camera.starting">
+                    <button type="button" x-show="camera.torchSupported" @click="toggleTorch()" title="Senter"
+                            class="grid size-9 place-items-center rounded-full backdrop-blur transition"
+                            :class="camera.torch ? 'bg-amber-400 text-amber-950' : 'bg-slate-900/60 text-white hover:bg-slate-900/80'"
+                            :aria-pressed="camera.torch" aria-label="Senter"><x-icon name="bolt" class="size-5" /></button>
+                    <button type="button" x-show="camera.canSwitch" @click="switchCamera()" title="Ganti kamera" aria-label="Ganti kamera"
+                            class="grid size-9 place-items-center rounded-full bg-slate-900/60 text-white backdrop-blur transition hover:bg-slate-900/80"><x-icon name="arrow-path" class="size-5" /></button>
+                </div>
+                <button type="button" @click="closeCamera()" title="Tutup kamera" aria-label="Tutup kamera"
+                        class="absolute top-2 left-2 grid size-9 place-items-center rounded-full bg-slate-900/60 text-white backdrop-blur transition hover:bg-slate-900/80"><x-icon name="x" class="size-5" /></button>
+
+                {{-- Hasil scan terakhir --}}
+                <div class="pointer-events-none absolute inset-x-2 bottom-2 flex justify-center">
+                    <p x-show="camera.feedback" x-transition.opacity
+                       class="flex max-w-full items-center gap-1.5 truncate rounded-full px-3 py-1.5 text-sm font-semibold shadow-lg"
+                       :class="camera.feedback?.ok ? 'bg-emerald-500 text-white' : 'bg-red-600 text-white'">
+                        <x-icon name="check-circle" class="size-4 shrink-0" x-show="camera.feedback?.ok" />
+                        <x-icon name="x-circle" class="size-4 shrink-0" x-show="!camera.feedback?.ok" />
+                        <span class="truncate" x-text="camera.feedback?.text"></span>
+                    </p>
+                    <p x-show="!camera.feedback && !camera.starting && !camera.error" class="rounded-full bg-slate-900/60 px-3 py-1 text-xs text-slate-200 backdrop-blur">
+                        Arahkan barcode ke dalam bingkai
+                    </p>
+                </div>
             </div>
             <div class="-mx-1 flex gap-2 overflow-x-auto px-1 pb-1">
                 <button type="button" @click="categoryId = null" class="btn btn-sm shrink-0 rounded-full"

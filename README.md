@@ -38,7 +38,8 @@ php artisan serve
 ```
 
 Buka <http://127.0.0.1:8000>. Agar bisa diakses dari tablet/komputer lain di jaringan yang sama:
-`php artisan serve --host=0.0.0.0` lalu buka `http://<ip-komputer>:8000`.
+`php artisan serve --host=0.0.0.0` lalu buka `http://<ip-komputer>:8000`
+(scan kamera di perangkat lain memerlukan HTTPS, lihat *Scan kamera* di bawah).
 
 ### 4. Akun demo (password: `password`)
 
@@ -116,6 +117,18 @@ barang masuk, penyesuaian stok, dan perhitungan laba.
   dan atur nomor rekening pada `TOKO_REKENING` di `.env`.
 - **Barcode scanner** bekerja sebagai keyboard: kolom pencarian di halaman kasir selalu fokus,
   kode yang dipindai + Enter langsung masuk keranjang. Pintasan: `F2` cari, `F9` bayar, `Esc` tutup.
+- **Scan kamera:** tombol kamera di halaman kasir memindai barcode (EAN-13/8, UPC-A/E, Code 128/39,
+  QR) lewat kamera HP, tablet, atau webcam (`resources/js/barcode-scanner.js`). Produk langsung masuk
+  keranjang dengan bunyi bip. Barcode yang tetap di depan kamera tidak ditambahkan berulang; jauhkan
+  lalu arahkan lagi untuk menambah jumlah. Hanya area di dalam bingkai yang dipindai. Memakai
+  `BarcodeDetector` bawaan browser bila ada (Chrome Android), selain itu ZXing (WebAssembly) yang
+  disajikan dari server toko sendiri, sehingga tidak perlu internet. Kamera dimatikan selama
+  pembayaran dan menyala lagi otomatis untuk transaksi berikutnya.
+
+  Browser hanya mengizinkan kamera pada **HTTPS atau `localhost`**. Bila tablet/HP membuka aplikasi
+  lewat `http://<ip-komputer>:8000`, pasang HTTPS di server. Untuk uji coba di Chrome Android: buka
+  `chrome://flags/#unsafely-treat-insecure-origin-as-secure`, isi alamat aplikasi
+  (mis. `http://192.168.1.10:8000`), pilih *Enabled*, lalu mulai ulang Chrome.
 - **Keamanan:** password di-hash (bcrypt), CSRF, validasi input di server, pembatasan percobaan login,
   akun nonaktif langsung dikeluarkan dari sesi, dan URL dipaksa HTTPS saat `APP_ENV=production`.
 
